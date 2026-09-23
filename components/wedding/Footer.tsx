@@ -40,7 +40,7 @@ export function Footer() {
         <div className="mt-10 flex items-center justify-center space-x-1 text-[11px] text-[#6B6A66]/60">
           <span>Được tạo với</span>
           <Heart size={11} className="text-[#8A6B3D] fill-[#8A6B3D]/30 inline" />
-          <span>cho ngày trọng đại của Tuấn Anh &amp; Hoa</span>
+          <span>cho ngày trọng đại của Tuấn Anh &amp; Dâu Tây</span>
         </div>
       </div>
     </footer>
