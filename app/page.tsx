@@ -5,6 +5,7 @@ import { TimelineSection } from '@/components/wedding/TimelineSection'
 import { LocationSection } from '@/components/wedding/LocationSection'
 import { GallerySection } from '@/components/wedding/GallerySection'
 import { RsvpSection } from '@/components/wedding/RsvpSection'
+import { AdminRsvpList } from '@/components/wedding/AdminRsvpList'
 import { Footer } from '@/components/wedding/Footer'
 import { MusicPlayer } from '@/components/wedding/MusicPlayer'
 import { WeddingEnvelope } from '@/components/wedding/WeddingEnvelope'
@@ -41,6 +42,9 @@ export default function Page() {
 
         {/* Interactive RSVP Form & Confirmation */}
         <RsvpSection />
+
+        {/* Admin Guest List from LocalStorage */}
+        <AdminRsvpList />
       </main>
 
       {/* Page Footer */}

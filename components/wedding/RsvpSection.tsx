@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { CheckCircle, Heart, Send, RefreshCw, AlertCircle } from 'lucide-react'
 import { weddingData } from '@/data/wedding-data'
+import { RsvpGuest, RSVP_STORAGE_KEY, RSVP_UPDATE_EVENT } from '@/types/rsvp'
 
 export function RsvpSection() {
   const { event, groom, bride } = weddingData
@@ -57,7 +58,31 @@ export function RsvpSection() {
 
     setIsSubmitting(true)
 
-    // Simulate mock submission delay (600ms)
+    // Lưu dữ liệu vào LocalStorage
+    try {
+      const newGuest: RsvpGuest = {
+        id: Date.now().toString(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        attendance: formData.attendance,
+        guestCount: formData.attendance === 'yes' ? Number(formData.guestCount) || 1 : 0,
+        wishes: formData.wishes.trim(),
+        createdAt: new Date().toISOString(),
+      }
+
+      const existingData = typeof window !== 'undefined' ? localStorage.getItem(RSVP_STORAGE_KEY) : null
+      const currentList: RsvpGuest[] = existingData ? JSON.parse(existingData) : []
+      const updatedList = [newGuest, ...currentList]
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(RSVP_STORAGE_KEY, JSON.stringify(updatedList))
+        window.dispatchEvent(new Event(RSVP_UPDATE_EVENT))
+      }
+    } catch (err) {
+      console.error('Lỗi khi lưu RSVP vào LocalStorage:', err)
+    }
+
+    // Giữ hiệu ứng phản hồi mượt mà (600ms)
     setTimeout(() => {
       setIsSubmitting(false)
       setIsSubmitted(true)
@@ -213,11 +238,10 @@ export function RsvpSection() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <label
-                    className={`flex items-center p-3.5 border rounded-[2px] cursor-pointer transition-all ${
-                      formData.attendance === 'yes'
-                        ? 'border-[#8A6B3D] bg-[#8A6B3D]/8'
-                        : 'border-[#B08D57]/40 hover:border-[#B08D57]'
-                    }`}
+                    className={`flex items-center p-3.5 border rounded-[2px] cursor-pointer transition-all ${formData.attendance === 'yes'
+                      ? 'border-[#8A6B3D] bg-[#8A6B3D]/8'
+                      : 'border-[#B08D57]/40 hover:border-[#B08D57]'
+                      }`}
                   >
                     <input
                       type="radio"
@@ -233,11 +257,10 @@ export function RsvpSection() {
                   </label>
 
                   <label
-                    className={`flex items-center p-3.5 border rounded-[2px] cursor-pointer transition-all ${
-                      formData.attendance === 'no'
-                        ? 'border-[#8A6B3D] bg-[#8A6B3D]/8'
-                        : 'border-[#B08D57]/40 hover:border-[#B08D57]'
-                    }`}
+                    className={`flex items-center p-3.5 border rounded-[2px] cursor-pointer transition-all ${formData.attendance === 'no'
+                      ? 'border-[#8A6B3D] bg-[#8A6B3D]/8'
+                      : 'border-[#B08D57]/40 hover:border-[#B08D57]'
+                      }`}
                   >
                     <input
                       type="radio"
