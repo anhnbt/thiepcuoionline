@@ -108,7 +108,7 @@ Dự án này đi qua nhiều giai đoạn. **Đừng nhảy cóc.**
 | Buổi 4 | `LocalStorage` — F5 không mất. |
 | Buổi 5 | Supabase (database đám mây). |
 
-Hiện dự án đang ở giai đoạn: **Buổi 3**
+Hiện dự án đang ở giai đoạn: **Buổi 5**
 
 Không tự ý nâng cấp lên giai đoạn sau khi tôi chưa yêu cầu.
 

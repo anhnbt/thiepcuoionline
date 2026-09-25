@@ -42,6 +42,17 @@ export function Footer() {
           <Heart size={11} className="text-[#8A6B3D] fill-[#8A6B3D]/30 inline" />
           <span>cho ngày trọng đại của Tuấn Anh &amp; Dâu Tây</span>
         </div>
+
+        {/* Admin CMS Dashboard link */}
+        <div className="mt-3">
+          <a
+            href="/admin"
+            className="text-[11px] text-[#807569]/60 hover:text-[#8A6B3D] transition-colors underline decoration-dotted"
+            title="Dành cho cô dâu & chú rể xem danh sách khách mời"
+          >
+            Quản trị RSVP
+          </a>
+        </div>
       </div>
     </footer>
   )

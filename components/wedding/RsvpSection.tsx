@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { CheckCircle, Heart, Send, RefreshCw, AlertCircle } from 'lucide-react'
 import { weddingData } from '@/data/wedding-data'
-import { RsvpGuest, RSVP_STORAGE_KEY, RSVP_UPDATE_EVENT } from '@/types/rsvp'
+import { createClient } from '@/utils/supabase/client'
 
 export function RsvpSection() {
   const { event, groom, bride } = weddingData
@@ -51,42 +51,54 @@ export function RsvpSection() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!validate()) return
 
     setIsSubmitting(true)
+    setErrors((prev) => {
+      const copy = { ...prev }
+      delete copy.submit
+      return copy
+    })
 
-    // Lưu dữ liệu vào LocalStorage
+    // Lưu dữ liệu vào Supabase Database
     try {
-      const newGuest: RsvpGuest = {
-        id: Date.now().toString(),
-        name: formData.name.trim(),
-        phone: formData.phone.trim(),
-        attendance: formData.attendance,
-        guestCount: formData.attendance === 'yes' ? Number(formData.guestCount) || 1 : 0,
-        wishes: formData.wishes.trim(),
-        createdAt: new Date().toISOString(),
+      const supabase = createClient()
+      const { error } = await supabase.from('rsvp_guests').insert([
+        {
+          guest_name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          status: formData.attendance,
+          guest_count: formData.attendance === 'yes' ? Number(formData.guestCount) || 1 : 0,
+          wishes: formData.wishes.trim(),
+        },
+      ])
+
+      if (error) {
+        console.error('Lỗi khi lưu RSVP vào Supabase:', error)
+        setErrors((prev) => ({
+          ...prev,
+          submit: 'Có lỗi xảy ra khi lưu thông tin vào hệ thống. Vui lòng thử lại hoặc liên hệ với cô dâu chú rể.',
+        }))
+        setIsSubmitting(false)
+        return
       }
 
-      const existingData = typeof window !== 'undefined' ? localStorage.getItem(RSVP_STORAGE_KEY) : null
-      const currentList: RsvpGuest[] = existingData ? JSON.parse(existingData) : []
-      const updatedList = [newGuest, ...currentList]
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(RSVP_STORAGE_KEY, JSON.stringify(updatedList))
-        window.dispatchEvent(new Event(RSVP_UPDATE_EVENT))
-      }
+      // Giữ hiệu ứng phản hồi mượt mà
+      setTimeout(() => {
+        setIsSubmitting(false)
+        setIsSubmitted(true)
+      }, 400)
     } catch (err) {
-      console.error('Lỗi khi lưu RSVP vào LocalStorage:', err)
-    }
-
-    // Giữ hiệu ứng phản hồi mượt mà (600ms)
-    setTimeout(() => {
+      console.error('Lỗi ngoại lệ khi gửi RSVP lên Supabase:', err)
+      setErrors((prev) => ({
+        ...prev,
+        submit: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.',
+      }))
       setIsSubmitting(false)
-      setIsSubmitted(true)
-    }, 600)
+    }
   }
 
   const handleReset = () => {
@@ -321,6 +333,14 @@ export function RsvpSection() {
                   className="w-full py-2.5 bg-transparent border-0 border-b border-[#B08D57] text-[#3A3A38] text-[15px] placeholder:text-[#6B6A66]/60 focus:outline-hidden focus:border-b-2 focus:border-[#8A6B3D] transition-all resize-none"
                 />
               </div>
+
+              {/* Thông báo lỗi khi gửi dữ liệu lên Supabase (nếu có) */}
+              {errors.submit && (
+                <div className="p-3 bg-[#BA1A1A]/10 border border-[#BA1A1A]/30 rounded-[2px] flex items-center space-x-2 text-[13px] text-[#BA1A1A]">
+                  <AlertCircle size={15} className="shrink-0" />
+                  <span>{errors.submit}</span>
+                </div>
+              )}
 
               {/* Submit CTA Button */}
               <div className="pt-3">
