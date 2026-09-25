@@ -10,7 +10,7 @@ interface AdminLoginProps {
 }
 
 export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
-  const [email, setEmail] = useState('admin@namlan.wedding')
+  const [email, setEmail] = useState('namlan2026@gmail.com')
   const [password, setPassword] = useState('NamLan@2026')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -59,7 +59,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
   // Nút điền nhanh tài khoản có sẵn
   const fillDefaultCredentials = () => {
-    setEmail('admin@namlan.wedding')
+    setEmail('namlan2026@gmail.com')
     setPassword('NamLan@2026')
     setErrorMessage(null)
   }
@@ -119,7 +119,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               </button>
             </div>
             <div className="font-mono text-[11px] text-[#6B6A66] space-y-0.5 pt-1 border-t border-[#B08D57]/20">
-              <p>Email: <span className="text-[#3A3A38] font-medium">admin@namlan.wedding</span></p>
+              <p>Email: <span className="text-[#3A3A38] font-medium">namlan2026@gmail.com</span></p>
               <p>Mật khẩu: <span className="text-[#3A3A38] font-medium">NamLan@2026</span></p>
             </div>
           </div>
@@ -137,7 +137,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@namlan.wedding"
+                  placeholder="namlan2026@gmail.com"
                   required
                   className="w-full pl-9 pr-3 py-2.5 bg-transparent border border-[#B08D57]/40 rounded-[2px] text-[14px] text-[#3A3A38] placeholder:text-[#6B6A66]/50 focus:outline-hidden focus:border-[#8A6B3D] transition-colors"
                 />
