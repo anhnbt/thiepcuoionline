@@ -82,7 +82,7 @@ export const weddingData: WeddingData = {
   },
   monogram: 'T & H',
   event: {
-    solarDate: '25 Tháng 12, 2026',
+    solarDate: '26 Tháng 12, 2026',
     lunarDate: '17 Tháng 11 năm Bính Ngọ',
     dayOfWeek: 'Thứ Sáu',
     year: 2026,
