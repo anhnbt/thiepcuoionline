@@ -178,7 +178,7 @@ export function RsvpSection() {
 
               <p className="text-[14px] text-[#6B6A66] leading-relaxed max-w-[400px] mx-auto font-light">
                 {formData.attendance === 'yes'
-                  ? `${groom.shortName} & ${bride.shortName} rất nóng lòng được chào đón bạn vào ngày 25/12/2026!`
+                  ? `${groom.shortName} & ${bride.shortName} rất nóng lòng được chào đón bạn vào ngày 26/12/2026!`
                   : `Cảm ơn bạn đã gửi lời chúc yêu thương đến ${groom.shortName} & ${bride.shortName}!`}
               </p>
 

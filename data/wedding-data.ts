@@ -87,7 +87,7 @@ export const weddingData: WeddingData = {
     dayOfWeek: 'Thứ Sáu',
     year: 2026,
     month: 12,
-    day: 25,
+    day: 26,
     time: '17:30',
     rsvpDeadline: '15 Tháng 12, 2026',
   },
