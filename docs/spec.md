@@ -1,115 +1,86 @@
 # Spec: Trang Sự Kiện & RSVP Thiệp Cưới Online
 
-- **Loại tài liệu**: Feature Specification (Spec-Driven Development)
-- **Phiên bản**: 0.1 (Draft)
-- **Ngày tạo**: 2026-09-18
-- **Chủ sở hữu**: (điền tên cô dâu/chú rể hoặc người phụ trách)
+## 1. Sản phẩm & người dùng
 
----
+Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa), giải quyết nhu cầu:
+* Khách mời xem thông tin ngày cưới, địa điểm, lịch trình chi tiết và album ảnh trực tiếp trên điện thoại (chủ yếu mở qua Zalo, Facebook Messenger).
+* Khách mời xác nhận tham dự (RSVP) nhanh chóng, dễ dàng mà không cần tạo tài khoản hay cài đặt ứng dụng.
+* Khách mời dễ dàng lưu sự kiện ngày cưới vào Google Calendar để không bị quên lịch.
 
-## 1. Tổng quan (Overview)
+## 2. Phạm vi MVP
 
-Xây dựng một trang web thiệp cưới online, dùng để:
-1. Giới thiệu thông tin sự kiện lễ cưới (thời gian, địa điểm, timeline).
-2. Cho phép khách mời xác nhận tham dự (RSVP).
-3. Trưng bày album ảnh cưới.
-4. Chỉ đường tới địa điểm tổ chức.
+* **Làm:**
+  * Thông tin sự kiện và lịch trình đám cưới (ngày 25/12/2026, từ 17:00 đến 21:30).
+  * Form xác nhận tham dự (RSVP).
+  * Bản đồ chỉ đường tới địa điểm tổ chức.
+  * Album ảnh cưới (xem phóng to ảnh).
+  * **Tính năng "Thêm vào lịch Google Calendar"**: Nút bấm mở tab tạo sự kiện Google Calendar với thông tin điền sẵn (tại khu vực Lịch trình/Sự kiện và màn hình cảm ơn sau RSVP).
+* **Cố tình chưa làm:**
+  * Tải tệp `.ics` hoặc tích hợp trực tiếp Apple Calendar / Outlook Calendar (giữ MVP gọn nhẹ).
+  * Mừng cưới online, quét mã QR thanh toán.
+  * Đếm số lượng mâm cỗ.
+  * Chatbox trực tiếp hoặc sổ lời chúc online.
 
-**Phạm vi hiện tại (v0.1)**: Chỉ làm **giao diện (frontend)**, chưa cần backend lưu trữ dữ liệu RSVP. Form RSVP hiển thị đầy đủ UI/UX nhưng dữ liệu nhập vào chưa cần được gửi/lưu vào đâu (có thể log ra console hoặc lưu tạm trong state, không cần persist).
+## 3. Tính năng
 
-**Ngoài phạm vi (Out of scope) v0.1**:
-- Không cần database (Google Sheets, Firebase, Supabase...).
-- Không cần gửi email/SMS xác nhận.
-- Không cần trang quản trị (admin dashboard) để xem danh sách khách.
-- Không cần chức năng gửi mừng cưới online (chưa chọn).
-- Không cần đa ngôn ngữ, sổ lời chúc, đếm ngược (chưa chọn, có thể bổ sung ở version sau).
+### 3.1 Thêm vào lịch Google Calendar
 
----
+* Khi khách bấm nút *"Thêm vào Google Calendar"* (tại khu vực Lịch trình sự kiện hoặc màn hình cảm ơn sau RSVP), trình duyệt mở một tab mới (`target="_blank"`, `rel="noopener noreferrer"`) dẫn tới trang tạo sự kiện của Google Calendar.
+* Khi trang Google Calendar mở ra, các trường sự kiện được điền sẵn đầy đủ:
+  * **Tiêu đề:** Đám cưới Tuấn Anh & Hoa (hoặc Nam & Lan).
+  * **Thời gian:** 17:00 - 21:30, ngày 25/12/2026 (múi giờ GMT+7, Asia/Ho_Chi_Minh).
+  * **Địa điểm:** Trung tâm Tiệc cưới Trống Đồng Palace Linh Đàm, Khu đô thị Bán đảo Linh Đàm, Hoàng Liệt, Hoàng Mai, Hà Nội.
+  * **Mô tả/Chi tiết:** Lời mời đám cưới kèm đường dẫn website thiệp cưới.
+* Khi khách bấm "Lưu" (Save) trên Google Calendar, sự kiện được ghi nhận vào lịch cá nhân của khách.
 
-## 2. Đối tượng người dùng (User Personas)
+### 3.2 Xác nhận tham dự (RSVP)
 
-| Persona | Mô tả | Mục tiêu |
+* Khi khách để trống Tên hoặc nhập sai định dạng Số điện thoại Việt Nam thì form báo lỗi, không cho gửi.
+* Khi khách gửi form thành công, hệ thống chuyển sang màn hình/thông báo cảm ơn và hiển thị nút nhắc *"Thêm vào Google Calendar"*.
+
+### 3.3 Lịch trình sự kiện (Timeline)
+
+* Hiển thị dòng thời gian các mốc từ 17:00 đón khách, 17:45 lễ thành hôn, 18:15 khai tiệc, 19:30 giao lưu âm nhạc đến 20:30 cảm tạ.
+
+### 3.4 Bản đồ chỉ đường (Location)
+
+* Hiển thị địa chỉ chi tiết và nút mở chỉ đường qua Google Maps.
+
+### 3.5 Album ảnh cưới (Gallery)
+
+* Hiển thị lưới ảnh cưới tối ưu trên điện thoại, hỗ trợ bấm vào để xem ảnh kích thước lớn (lightbox/modal).
+
+## 4. Dữ liệu & vai trò
+
+### Dữ liệu sự kiện & Lịch
+
+| Trường dữ liệu | Nguồn dữ liệu | Giá trị mặc định |
 |---|---|---|
-| Khách mời | Nhận link thiệp cưới, xem trên điện thoại là chủ yếu | Xem thông tin sự kiện nhanh, RSVP dễ dàng, xem đường đi |
-| Cô dâu/Chú rể (chủ sở hữu trang) | Người chia sẻ link cho khách | Trang đẹp, dễ chia sẻ, thể hiện đúng phong cách cá nhân |
+| Tiêu đề sự kiện | `weddingData` | Đám cưới Tuấn Anh & Hoa |
+| Thời gian bắt đầu | `weddingData.event` | 2026-12-25 17:00 (GMT+7) |
+| Thời gian kết thúc | `weddingData.event` | 2026-12-25 21:30 (GMT+7) |
+| Địa điểm tổ chức | `weddingData.venues[0]` | Trống Đồng Palace Linh Đàm, Hoàng Mai, Hà Nội |
+| Đường dẫn URL | URL website thực tế | Đường dẫn website thiệp cưới |
 
----
+### Phân quyền vai trò
 
-## 3. Tính năng cốt lõi (Functional Requirements)
+| Vai trò | Xem thông tin & Bấm thêm Calendar | Gửi RSVP | Quản trị dữ liệu |
+|---|---|---|---|
+| **Khách mời** (Mọi người truy cập) | Có (tại mục Lịch trình & sau RSVP) | Có | Không |
+| **Admin / Chủ tiệc** | Có | Có | Xem danh sách RSVP (ở giai đoạn sau) |
 
-### 3.1 RSVP — Xác nhận tham dự
-- **FR-1.1**: Form RSVP thu thập: Tên khách mời, Số điện thoại, Số lượng người tham dự.
-- **FR-1.2**: Khách chọn "Tham dự" hoặc "Không thể tham dự".
-- **FR-1.3**: Validate cơ bản: Tên không rỗng, SĐT đúng định dạng VN, số lượng người ≥ 1 (nếu chọn tham dự).
-- **FR-1.4**: Sau khi submit, hiển thị màn hình/thông báo cảm ơn (confirmation state), không cần gọi API thật — có thể giả lập (mock submit).
-- **FR-1.5** *(Open question)*: Có cần giới hạn số lượng người đi kèm tối đa không? (VD: tối đa 2 người/thiệp)
+## 5. Trường hợp biên
 
-### 3.2 Lịch trình sự kiện (Timeline)
-- **FR-2.1**: Hiển thị timeline các mốc thời gian trong ngày cưới (VD: Lễ đón khách, Lễ thành hôn, Tiệc cưới...).
-- **FR-2.2**: Mỗi mốc gồm: Giờ, Tên hoạt động, Mô tả ngắn (tuỳ chọn), Icon (tuỳ chọn).
-- **FR-2.3**: Responsive tốt trên mobile (dạng dọc/vertical timeline).
+* **Khách mở từ trình duyệt nhúng (in-app browser) của Zalo / Facebook Messenger:**
+  * Sử dụng liên kết web tiêu chuẩn `https://calendar.google.com/calendar/render?action=TEMPLATE...` mở tab mới để đảm bảo tính tương thích; nếu chưa đăng nhập Google, trang Google sẽ yêu cầu đăng nhập trước khi hiển thị form sự kiện.
+* **Lệch múi giờ thiết bị:**
+  * Khóa cứng tham số múi giờ `ctz=Asia/Ho_Chi_Minh` hoặc định dạng giờ UTC chuẩn (`20261225T100000Z/20261225T143000Z`) để tránh trường hợp điện thoại khách đặt lệch múi giờ làm sai thời gian đám cưới.
+* **Ký tự tiếng Việt có dấu:**
+  * Toàn bộ nội dung tiêu đề, địa điểm, mô tả đều được mã hoá URL chuẩn (`encodeURIComponent`) để không bị lỗi font hoặc đứt gãy liên kết trên di động.
+* **Khách dùng iPhone không dùng Google Calendar:**
+  * Link vẫn mở giao diện web của Google Calendar bình thường trong Safari; khách có thể đăng nhập tài khoản Google để lưu. (Hỗ trợ file `.ics` cho Apple Calendar sẽ xem xét ở giai đoạn sau).
 
-### 3.3 Bản đồ chỉ đường (Location/Map)
-- **FR-3.1**: Hiển thị tên địa điểm, địa chỉ đầy đủ.
-- **FR-3.2**: Nhúng bản đồ (Google Maps embed hoặc link "Chỉ đường" mở Google Maps app).
-- **FR-3.3**: Nếu có nhiều địa điểm (VD: lễ ở nhà thờ, tiệc ở nhà hàng) → hiển thị từng địa điểm riêng biệt.
+## 6. Câu hỏi còn mở
 
-### 3.4 Album ảnh cưới
-- **FR-4.1**: Hiển thị lưới ảnh (gallery grid), responsive.
-- **FR-4.2**: Click vào ảnh → xem full-size (lightbox/modal).
-- **FR-4.3**: Hỗ trợ số lượng ảnh linh hoạt (dễ thêm/bớt ảnh).
-- **FR-4.4** *(Open question)*: Có cần thêm video (VD: prewedding video) không?
-
----
-
-## 4. Giao diện (UI/UX)
-
-> ⚠️ **Open Question**: File `DESIGN.md` chưa được cung cấp. Phần này là **placeholder** — cần cập nhật khi có file thiết kế, hoặc trả lời nhanh các câu hỏi bên dưới để mình bổ sung.
-
-**Cần làm rõ thêm** (điền vào để hoàn thiện spec):
-- [ ] Phong cách thị giác: tối giản / lãng mạn-hoa văn / hiện đại-đậm / cổ điển-sang trọng?
-- [ ] Bảng màu chủ đạo (nếu có, VD: be - vàng đồng, xanh sage, hồng pastel...)
-- [ ] Font chữ mong muốn (nếu có gu riêng)
-- [ ] Có ảnh/logo/monogram của cặp đôi để làm điểm nhấn không?
-- [ ] Bố cục: 1 trang dài (single-page scroll) hay nhiều section/tab?
-
-**Yêu cầu kỹ thuật giao diện chung**:
-- **FR-5.1**: Responsive, ưu tiên trải nghiệm mobile-first (đa số khách xem trên điện thoại qua link chia sẻ Zalo/Messenger).
-- **FR-5.2**: Có hiệu ứng chuyển động nhẹ nhàng (fade-in, scroll animation) tăng cảm giác sang trọng, không gây rối mắt.
-- **FR-5.3**: Tốc độ tải trang nhanh, tối ưu ảnh.
-
----
-
-## 5. Dữ liệu (Data)
-
-- **DR-1**: Đây là bản v0.1 **frontend-only** — không có backend, không có database.
-- **DR-2**: Dữ liệu sự kiện (tên cô dâu/chú rể, ngày giờ, địa điểm, timeline, danh sách ảnh) được khai báo **cứng (hardcoded)** trong code hoặc file cấu hình JSON/JS đơn giản, dễ chỉnh sửa thủ công.
-- **DR-3**: Dữ liệu RSVP khách nhập vào: không persist — chỉ lưu tạm trong local state của form để hiển thị màn hình cảm ơn, sau khi refresh trang sẽ mất (điều này chấp nhận được ở v0.1).
-- **DR-4 (Future/Out of scope)**: Khi cần lưu trữ thật, có thể nâng cấp bằng Google Sheets (qua Apps Script API) hoặc Firebase/Supabase — sẽ làm spec riêng khi cần.
-
----
-
-## 6. Yêu cầu phi chức năng (Non-Functional Requirements)
-
-- **NFR-1**: Hỗ trợ tốt trên trình duyệt mobile (Safari iOS, Chrome Android).
-- **NFR-2**: Thời gian tải trang ban đầu < 3s trên mạng 4G.
-- **NFR-3**: Trang phải hiển thị tốt khi chia sẻ preview link qua Zalo/Facebook/Messenger (Open Graph meta tags: tiêu đề, mô tả, ảnh đại diện).
-- **NFR-4**: Dễ dàng chỉnh sửa nội dung (tên, ngày giờ, địa điểm, ảnh) mà không cần sửa nhiều code.
-
----
-
-## 7. Câu hỏi mở / Cần quyết định thêm (Open Questions)
-
-1. Phong cách giao diện cụ thể (chờ `DESIGN.md` hoặc trả lời nhanh).
-2. Có giới hạn số người đi kèm khi RSVP không?
-3. Có cần thêm video prewedding vào album không?
-4. Tên miền/cách chia sẻ link: dùng tên miền riêng hay chia sẻ qua link tạm?
-5. Ngôn ngữ hiển thị: chỉ tiếng Việt hay cần thêm tiếng Anh?
-
----
-
-## 8. Bước tiếp theo (Next Steps)
-
-1. Xác nhận/bổ sung phần **Giao diện (Section 4)** bằng cách gửi `DESIGN.md` hoặc trả lời các câu hỏi mở.
-2. Từ `spec.md` này, sinh ra `plan.md` (kiến trúc kỹ thuật, cấu trúc thư mục, component breakdown).
-3. Từ `plan.md`, sinh ra `tasks.md` (danh sách task cụ thể để implement).
+1. Có cần làm thêm nút tải file `.ics` (iCalendar) cho khách dùng iPhone muốn lưu trực tiếp vào ứng dụng Lịch mặc định của Apple không? (Đã tạm hoãn ở MVP).
+2. Tên cặp đôi trong dữ liệu cưới: Đồng bộ hiển thị "Tuấn Anh & Hoa" hay "Nam & Lan" giữa `GEMINI.md` và `wedding-data.ts` khi phát hành chính thức?

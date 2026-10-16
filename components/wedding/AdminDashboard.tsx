@@ -22,14 +22,22 @@ import {
   CheckCircle2,
   Calendar,
   Sparkles,
-  LogOut
+  LogOut,
+  KeyRound,
+  ShieldCheck
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { SupabaseRsvpGuest } from '@/types/rsvp'
+import { AdminRole } from '@/types/admin'
 import { AdminLogin } from '@/components/wedding/AdminLogin'
+import { AdminUserManagement } from '@/components/wedding/admin/AdminUserManagement'
+import { ChangePasswordModal } from '@/components/wedding/admin/ChangePasswordModal'
 
 export function AdminDashboard() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [currentUserRole, setCurrentUserRole] = useState<AdminRole>('admin')
+  const [activeTab, setActiveTab] = useState<'guests' | 'users'>('guests')
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [isAuthChecking, setIsAuthChecking] = useState(true)
   const [guests, setGuests] = useState<SupabaseRsvpGuest[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -51,6 +59,17 @@ export function AdminDashboard() {
       setIsAuthChecking(false)
       if (user) {
         fetchGuests()
+        // Lấy vai trò của user từ bảng admin_users nếu có
+        supabase
+          .from('admin_users')
+          .select('role')
+          .eq('email', user.email)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data?.role) {
+              setCurrentUserRole(data.role as AdminRole)
+            }
+          })
       }
     })
 
@@ -122,6 +141,11 @@ export function AdminDashboard() {
 
   // Thao tác xoá khách mời khỏi cơ sở dữ liệu
   const handleDeleteGuest = async (id: number, name: string) => {
+    if (currentUserRole === 'viewer') {
+      alert('Tài khoản của bạn chỉ có quyền xem, không được phép xoá dữ liệu phản hồi.')
+      return
+    }
+
     if (!confirm(`Bạn có chắc chắn muốn xoá phản hồi của khách "${name}" không? Thao tác này sẽ xoá trực tiếp trên Supabase.`)) {
       return
     }
@@ -301,11 +325,8 @@ export function AdminDashboard() {
                 </span>
               </div>
               <h1 className="font-serif text-[24px] sm:text-[28px] text-[#3A3A38] font-medium leading-tight">
-                Quản Trị Khách Mời & Thống Kê RSVP
+                Quản Trị Khách Mời
               </h1>
-              <p className="text-[12px] sm:text-[13px] text-[#6B6A66] mt-0.5">
-                Dữ liệu khách phản hồi từ thiệp cưới Nam & Lan (Đồng bộ Supabase Database)
-              </p>
             </div>
 
             {/* Right Header: Nút hành động */}
@@ -314,7 +335,23 @@ export function AdminDashboard() {
               <div className="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1.5 bg-[#EFEEEB] border border-[#B08D57]/30 rounded-[2px] text-[11px] text-[#3A3A38]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#516442]" />
                 <span className="font-mono text-[#6B6A66]">{currentUser.email}</span>
+                {currentUserRole === 'admin' ? (
+                  <span className="text-[10px] text-[#8A6B3D] font-medium bg-[#8A6B3D]/10 px-1 py-0.2 rounded-[2px]">Admin</span>
+                ) : (
+                  <span className="text-[10px] text-[#6B6A66] font-medium bg-[#6B6A66]/10 px-1 py-0.2 rounded-[2px]">Viewer</span>
+                )}
               </div>
+
+              {/* Nút đổi mật khẩu cá nhân */}
+              <button
+                type="button"
+                onClick={() => setIsChangePasswordOpen(true)}
+                className="inline-flex items-center space-x-1.5 px-3 py-2 border border-[#B08D57]/40 hover:border-[#8A6B3D] hover:bg-[#8A6B3D]/5 text-[12px] text-[#8A6B3D] rounded-[2px] transition-colors cursor-pointer"
+                title="Đổi mật khẩu tài khoản đang đăng nhập"
+              >
+                <KeyRound size={13} />
+                <span className="hidden sm:inline">Đổi mật khẩu</span>
+              </button>
 
               <button
                 type="button"
@@ -349,399 +386,449 @@ export function AdminDashboard() {
               </button>
             </div>
           </div>
+
+          {/* Thanh chuyển đổi Tab: Khách mời | Người dùng */}
+          <div className="flex items-center space-x-6 mt-4 pt-1 border-t border-[#B08D57]/20">
+            <button
+              type="button"
+              onClick={() => setActiveTab('guests')}
+              className={`pb-2 text-[13px] font-medium transition-colors border-b-2 flex items-center space-x-2 cursor-pointer ${activeTab === 'guests'
+                ? 'border-[#8A6B3D] text-[#8A6B3D]'
+                : 'border-transparent text-[#6B6A66] hover:text-[#3A3A38]'
+                }`}
+            >
+              <Users size={15} />
+              <span>Khách mời</span>
+              <span className="ml-1 text-[11px] px-1.5 py-0.2 bg-[#8A6B3D]/10 rounded-full font-mono">
+                {guests.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('users')}
+              className={`pb-2 text-[13px] font-medium transition-colors border-b-2 flex items-center space-x-2 cursor-pointer ${activeTab === 'users'
+                ? 'border-[#8A6B3D] text-[#8A6B3D]'
+                : 'border-transparent text-[#6B6A66] hover:text-[#3A3A38]'
+                }`}
+            >
+              <ShieldCheck size={15} />
+              <span>Người dùng</span>
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        {/* Banner thông báo lỗi nếu có */}
-        {errorMessage && (
-          <div className="mb-6 p-4 bg-[#BA1A1A]/10 border border-[#BA1A1A]/30 rounded-[2px] flex items-start space-x-3 text-[#BA1A1A]">
-            <AlertCircle size={18} className="shrink-0 mt-0.5" />
-            <div className="flex-1 text-[13px]">
-              <p className="font-semibold">Đã xảy ra lỗi khi kết nối Supabase:</p>
-              <p className="font-mono text-[12px] mt-1">{errorMessage}</p>
-              <button
-                type="button"
-                onClick={() => fetchGuests(true)}
-                className="mt-2 inline-flex items-center space-x-1 underline text-[12px] hover:font-medium"
-              >
-                <span>Thử kết nối lại ngay</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 1. KHỐI THỐNG KÊ (KPI Cards) */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
-          {/* Card: Tổng số phản hồi */}
-          <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Lượt phản hồi</span>
-              <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
-                <Users size={16} />
+        {activeTab === 'users' ? (
+          <AdminUserManagement
+            currentUserEmail={currentUser.email}
+            currentUserRole={currentUserRole}
+            onToast={showToast}
+          />
+        ) : (
+          <>
+            {/* Banner thông báo lỗi nếu có */}
+            {errorMessage && (
+              <div className="mb-6 p-4 bg-[#BA1A1A]/10 border border-[#BA1A1A]/30 rounded-[2px] flex items-start space-x-3 text-[#BA1A1A]">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <div className="flex-1 text-[13px]">
+                  <p className="font-semibold">Đã xảy ra lỗi khi kết nối Supabase:</p>
+                  <p className="font-mono text-[12px] mt-1">{errorMessage}</p>
+                  <button
+                    type="button"
+                    onClick={() => fetchGuests(true)}
+                    className="mt-2 inline-flex items-center space-x-1 underline text-[12px] hover:font-medium"
+                  >
+                    <span>Thử kết nối lại ngay</span>
+                  </button>
+                </div>
               </div>
-            </div>
-            <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#3A3A38] leading-none">
-              {stats.totalResponses}
-            </p>
-            <p className="text-[11px] text-[#6B6A66] mt-2">Tổng số lượt gửi RSVP</p>
-          </div>
-
-          {/* Card: Tổng số người tham dự thực tế */}
-          <div className="bg-[#FAF9F6] border-2 border-[#516442]/40 rounded-[2px] p-4 sm:p-5 shadow-xs relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-12 h-12 bg-[#516442]/10 rounded-bl-full pointer-events-none" />
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] uppercase tracking-wider text-[#516442] font-semibold">Tổng người tham dự</span>
-              <div className="w-8 h-8 rounded-full bg-[#516442]/15 flex items-center justify-center text-[#516442]">
-                <UserCheck size={16} />
-              </div>
-            </div>
-            <div className="flex items-baseline space-x-1.5">
-              <span className="text-[26px] sm:text-[30px] font-serif font-bold text-[#516442] leading-none">
-                {stats.totalAttendingGuests}
-              </span>
-              <span className="text-[12px] text-[#516442] font-medium">người</span>
-            </div>
-            <p className="text-[11px] text-[#6B6A66] mt-2">
-              Từ {stats.attendingResponsesCount} lượt đăng ký
-            </p>
-          </div>
-
-          {/* Card: Số lượt báo vắng */}
-          <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Không thể đến</span>
-              <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
-                <UserX size={16} />
-              </div>
-            </div>
-            <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#3A3A38] leading-none">
-              {stats.totalDeclined}
-            </p>
-            <p className="text-[11px] text-[#6B6A66] mt-2">Lượt gửi lời cáo lỗi</p>
-          </div>
-
-          {/* Card: Tỷ lệ tham dự */}
-          <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Tỷ lệ tham dự</span>
-              <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
-                <Percent size={16} />
-              </div>
-            </div>
-            <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#8A6B3D] leading-none">
-              {stats.attendanceRate}%
-            </p>
-            <p className="text-[11px] text-[#6B6A66] mt-2">Tỷ lệ đồng ý trên tổng gửi</p>
-          </div>
-
-          {/* Card: Lời chúc nhận được */}
-          <div className="col-span-2 lg:col-span-1 bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Lời chúc mừng</span>
-              <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
-                <Heart size={16} />
-              </div>
-            </div>
-            <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#3A3A38] leading-none">
-              {stats.wishesCount}
-            </p>
-            <p className="text-[11px] text-[#6B6A66] mt-2">Lời chúc ấm áp từ khách</p>
-          </div>
-        </div>
-
-        {/* 2. BỘ ĐIỀU KHIỂN: TÌM KIẾM, BỘ LỌC, SẮP XẾP */}
-        <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 mb-6 shadow-xs">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-            {/* Ô tìm kiếm */}
-            <div className="relative flex-1 max-w-md">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#807569]" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm theo tên khách, số điện thoại, lời chúc..."
-                className="w-full pl-9 pr-3 py-2 bg-transparent border border-[#B08D57]/40 rounded-[2px] text-[13px] text-[#3A3A38] placeholder:text-[#6B6A66]/60 focus:outline-hidden focus:border-[#8A6B3D] transition-colors"
-              />
-            </div>
-
-            {/* Nhóm Filter & Sort */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Lọc theo trạng thái */}
-              <div className="flex items-center space-x-1 bg-[#EFEEEB] p-0.5 rounded-[2px] border border-[#B08D57]/20 text-[12px]">
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1.5 rounded-[2px] transition-colors cursor-pointer ${
-                    statusFilter === 'all'
-                      ? 'bg-[#FAF9F6] text-[#3A3A38] font-medium shadow-xs'
-                      : 'text-[#6B6A66] hover:text-[#3A3A38]'
-                  }`}
-                >
-                  Tất cả ({guests.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('yes')}
-                  className={`px-3 py-1.5 rounded-[2px] transition-colors cursor-pointer ${
-                    statusFilter === 'yes'
-                      ? 'bg-[#FAF9F6] text-[#516442] font-semibold shadow-xs'
-                      : 'text-[#6B6A66] hover:text-[#516442]'
-                  }`}
-                >
-                  Tham dự ({stats.attendingResponsesCount})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('no')}
-                  className={`px-3 py-1.5 rounded-[2px] transition-colors cursor-pointer ${
-                    statusFilter === 'no'
-                      ? 'bg-[#FAF9F6] text-[#8A6B3D] font-semibold shadow-xs'
-                      : 'text-[#6B6A66] hover:text-[#8A6B3D]'
-                  }`}
-                >
-                  Không đến ({stats.totalDeclined})
-                </button>
-              </div>
-
-              {/* Sắp xếp */}
-              <div className="flex items-center space-x-1.5 text-[12px] text-[#6B6A66]">
-                <Filter size={13} className="text-[#8A6B3D]" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'name')}
-                  aria-label="Sắp xếp danh sách khách mời"
-                  className="bg-transparent border border-[#B08D57]/40 rounded-[2px] px-2.5 py-1.5 text-[12px] text-[#3A3A38] focus:outline-hidden focus:border-[#8A6B3D] cursor-pointer"
-                >
-                  <option value="newest">Mới nhất trước</option>
-                  <option value="oldest">Cũ nhất trước</option>
-                  <option value="name">Tên khách (A - Z)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. BẢNG DANH SÁCH KHÁCH MỜI */}
-        <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] shadow-xs overflow-hidden">
-          {/* Header của bảng */}
-          <div className="px-5 py-4 border-b border-[#B08D57]/20 flex items-center justify-between bg-[#EFEEEB]/50">
-            <div className="flex items-center space-x-2">
-              <Sparkles size={16} className="text-[#8A6B3D]" />
-              <h2 className="font-serif text-[16px] text-[#3A3A38] font-medium">
-                Danh Sách Khách Đăng Ký
-              </h2>
-              <span className="text-[12px] text-[#6B6A66]">
-                ({filteredAndSortedGuests.length} kết quả)
-              </span>
-            </div>
-
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="text-[11px] text-[#8A6B3D] hover:underline"
-              >
-                Xoá bộ lọc tìm kiếm
-              </button>
             )}
-          </div>
 
-          {/* Trạng thái Loading */}
-          {isLoading ? (
-            <div className="text-center py-16 px-4">
-              <RefreshCw size={28} className="animate-spin mx-auto text-[#8A6B3D] mb-3" />
-              <p className="text-[14px] text-[#6B6A66]">Đang tải dữ liệu từ Supabase Database...</p>
+            {/* 1. KHỐI THỐNG KÊ (KPI Cards) */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
+              {/* Card: Tổng số phản hồi */}
+              <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Lượt phản hồi</span>
+                  <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
+                    <Users size={16} />
+                  </div>
+                </div>
+                <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#3A3A38] leading-none">
+                  {stats.totalResponses}
+                </p>
+                <p className="text-[11px] text-[#6B6A66] mt-2">Tổng số lượt gửi RSVP</p>
+              </div>
+
+              {/* Card: Tổng số người tham dự thực tế */}
+              <div className="bg-[#FAF9F6] border-2 border-[#516442]/40 rounded-[2px] p-4 sm:p-5 shadow-xs relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-12 h-12 bg-[#516442]/10 rounded-bl-full pointer-events-none" />
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] uppercase tracking-wider text-[#516442] font-semibold">Tổng người tham dự</span>
+                  <div className="w-8 h-8 rounded-full bg-[#516442]/15 flex items-center justify-center text-[#516442]">
+                    <UserCheck size={16} />
+                  </div>
+                </div>
+                <div className="flex items-baseline space-x-1.5">
+                  <span className="text-[26px] sm:text-[30px] font-serif font-bold text-[#516442] leading-none">
+                    {stats.totalAttendingGuests}
+                  </span>
+                  <span className="text-[12px] text-[#516442] font-medium">người</span>
+                </div>
+                <p className="text-[11px] text-[#6B6A66] mt-2">
+                  Từ {stats.attendingResponsesCount} lượt đăng ký
+                </p>
+              </div>
+
+              {/* Card: Số lượt báo vắng */}
+              <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Không thể đến</span>
+                  <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
+                    <UserX size={16} />
+                  </div>
+                </div>
+                <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#3A3A38] leading-none">
+                  {stats.totalDeclined}
+                </p>
+                <p className="text-[11px] text-[#6B6A66] mt-2">Lượt gửi lời cáo lỗi</p>
+              </div>
+
+              {/* Card: Tỷ lệ tham dự */}
+              <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Tỷ lệ tham dự</span>
+                  <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
+                    <Percent size={16} />
+                  </div>
+                </div>
+                <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#8A6B3D] leading-none">
+                  {stats.attendanceRate}%
+                </p>
+                <p className="text-[11px] text-[#6B6A66] mt-2">Tỷ lệ đồng ý trên tổng gửi</p>
+              </div>
+
+              {/* Card: Lời chúc nhận được */}
+              <div className="col-span-2 lg:col-span-1 bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 shadow-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] uppercase tracking-wider text-[#6B6A66] font-medium">Lời chúc mừng</span>
+                  <div className="w-8 h-8 rounded-full bg-[#8A6B3D]/10 flex items-center justify-center text-[#8A6B3D]">
+                    <Heart size={16} />
+                  </div>
+                </div>
+                <p className="text-[26px] sm:text-[30px] font-serif font-semibold text-[#3A3A38] leading-none">
+                  {stats.wishesCount}
+                </p>
+                <p className="text-[11px] text-[#6B6A66] mt-2">Lời chúc ấm áp từ khách</p>
+              </div>
             </div>
-          ) : filteredAndSortedGuests.length === 0 ? (
-            /* Trạng thái Trống */
-            <div className="text-center py-16 px-4">
-              <AlertCircle size={36} className="mx-auto text-[#8A6B3D]/50 mb-3" />
-              <p className="text-[16px] font-serif text-[#3A3A38]">
-                {guests.length === 0
-                  ? 'Chưa có bản ghi RSVP nào trong cơ sở dữ liệu.'
-                  : 'Không tìm thấy khách nào phù hợp với bộ lọc hiện tại.'}
-              </p>
-              <p className="text-[13px] text-[#6B6A66] mt-1.5 max-w-md mx-auto">
-                {guests.length === 0
-                  ? 'Khi khách mời gửi biểu mẫu RSVP từ trang thiệp cưới, dữ liệu sẽ tự động xuất hiện tại đây.'
-                  : 'Vui lòng kiểm tra lại từ khóa tìm kiếm hoặc đổi trạng thái bộ lọc.'}
-              </p>
+
+            {/* 2. BỘ ĐIỀU KHIỂN: TÌM KIẾM, BỘ LỌC, SẮP XẾP */}
+            <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] p-4 sm:p-5 mb-6 shadow-xs">
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                {/* Ô tìm kiếm */}
+                <div className="relative flex-1 max-w-md">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#807569]" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Tìm theo tên khách, số điện thoại, lời chúc..."
+                    className="w-full pl-9 pr-3 py-2 bg-transparent border border-[#B08D57]/40 rounded-[2px] text-[13px] text-[#3A3A38] placeholder:text-[#6B6A66]/60 focus:outline-hidden focus:border-[#8A6B3D] transition-colors"
+                  />
+                </div>
+
+                {/* Nhóm Filter & Sort */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Lọc theo trạng thái */}
+                  <div className="flex items-center space-x-1 bg-[#EFEEEB] p-0.5 rounded-[2px] border border-[#B08D57]/20 text-[12px]">
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter('all')}
+                      className={`px-3 py-1.5 rounded-[2px] transition-colors cursor-pointer ${statusFilter === 'all'
+                        ? 'bg-[#FAF9F6] text-[#3A3A38] font-medium shadow-xs'
+                        : 'text-[#6B6A66] hover:text-[#3A3A38]'
+                        }`}
+                    >
+                      Tất cả ({guests.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter('yes')}
+                      className={`px-3 py-1.5 rounded-[2px] transition-colors cursor-pointer ${statusFilter === 'yes'
+                        ? 'bg-[#FAF9F6] text-[#516442] font-semibold shadow-xs'
+                        : 'text-[#6B6A66] hover:text-[#516442]'
+                        }`}
+                    >
+                      Tham dự ({stats.attendingResponsesCount})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter('no')}
+                      className={`px-3 py-1.5 rounded-[2px] transition-colors cursor-pointer ${statusFilter === 'no'
+                        ? 'bg-[#FAF9F6] text-[#8A6B3D] font-semibold shadow-xs'
+                        : 'text-[#6B6A66] hover:text-[#8A6B3D]'
+                        }`}
+                    >
+                      Không đến ({stats.totalDeclined})
+                    </button>
+                  </div>
+
+                  {/* Sắp xếp */}
+                  <div className="flex items-center space-x-1.5 text-[12px] text-[#6B6A66]">
+                    <Filter size={13} className="text-[#8A6B3D]" />
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'name')}
+                      aria-label="Sắp xếp danh sách khách mời"
+                      className="bg-transparent border border-[#B08D57]/40 rounded-[2px] px-2.5 py-1.5 text-[12px] text-[#3A3A38] focus:outline-hidden focus:border-[#8A6B3D] cursor-pointer"
+                    >
+                      <option value="newest">Mới nhất trước</option>
+                      <option value="oldest">Cũ nhất trước</option>
+                      <option value="name">Tên khách (A - Z)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <>
-              {/* DESKTOP TABLE VIEW (Hiện trên màn hình sm trở lên) */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-left border-collapse text-[13px]">
-                  <thead>
-                    <tr className="border-b border-[#B08D57]/20 bg-[#FAF9F6] text-[#8A6B3D] text-[11px] uppercase tracking-wider font-semibold">
-                      <th className="py-3 px-4 w-12 text-center">STT</th>
-                      <th className="py-3 px-4">Khách mời</th>
-                      <th className="py-3 px-4">Số điện thoại</th>
-                      <th className="py-3 px-4">Trạng thái</th>
-                      <th className="py-3 px-4 text-center">Số người</th>
-                      <th className="py-3 px-4">Lời chúc</th>
-                      <th className="py-3 px-4">Thời gian</th>
-                      <th className="py-3 px-4 text-right w-16">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#B08D57]/15">
+
+            {/* 3. BẢNG DANH SÁCH KHÁCH MỜI */}
+            <div className="bg-[#FAF9F6] border border-[#B08D57]/30 rounded-[2px] shadow-xs overflow-hidden">
+              {/* Header của bảng */}
+              <div className="px-5 py-4 border-b border-[#B08D57]/20 flex items-center justify-between bg-[#EFEEEB]/50">
+                <div className="flex items-center space-x-2">
+                  <Sparkles size={16} className="text-[#8A6B3D]" />
+                  <h2 className="font-serif text-[16px] text-[#3A3A38] font-medium">
+                    Danh Sách Khách Đăng Ký
+                  </h2>
+                  <span className="text-[12px] text-[#6B6A66]">
+                    ({filteredAndSortedGuests.length} kết quả)
+                  </span>
+                </div>
+
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="text-[11px] text-[#8A6B3D] hover:underline"
+                  >
+                    Xoá bộ lọc tìm kiếm
+                  </button>
+                )}
+              </div>
+
+              {/* Trạng thái Loading */}
+              {isLoading ? (
+                <div className="text-center py-16 px-4">
+                  <RefreshCw size={28} className="animate-spin mx-auto text-[#8A6B3D] mb-3" />
+                  <p className="text-[14px] text-[#6B6A66]">Đang tải dữ liệu từ Supabase Database...</p>
+                </div>
+              ) : filteredAndSortedGuests.length === 0 ? (
+                /* Trạng thái Trống */
+                <div className="text-center py-16 px-4">
+                  <AlertCircle size={36} className="mx-auto text-[#8A6B3D]/50 mb-3" />
+                  <p className="text-[16px] font-serif text-[#3A3A38]">
+                    {guests.length === 0
+                      ? 'Chưa có bản ghi RSVP nào trong cơ sở dữ liệu.'
+                      : 'Không tìm thấy khách nào phù hợp với bộ lọc hiện tại.'}
+                  </p>
+                  <p className="text-[13px] text-[#6B6A66] mt-1.5 max-w-md mx-auto">
+                    {guests.length === 0
+                      ? 'Khi khách mời gửi biểu mẫu RSVP từ trang thiệp cưới, dữ liệu sẽ tự động xuất hiện tại đây.'
+                      : 'Vui lòng kiểm tra lại từ khóa tìm kiếm hoặc đổi trạng thái bộ lọc.'}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* DESKTOP TABLE VIEW (Hiện trên màn hình sm trở lên) */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-[13px]">
+                      <thead>
+                        <tr className="border-b border-[#B08D57]/20 bg-[#FAF9F6] text-[#8A6B3D] text-[11px] uppercase tracking-wider font-semibold">
+                          <th className="py-3 px-4 w-12 text-center">STT</th>
+                          <th className="py-3 px-4">Khách mời</th>
+                          <th className="py-3 px-4">Số điện thoại</th>
+                          <th className="py-3 px-4">Trạng thái</th>
+                          <th className="py-3 px-4 text-center">Số người</th>
+                          <th className="py-3 px-4">Lời chúc</th>
+                          <th className="py-3 px-4">Thời gian</th>
+                          <th className="py-3 px-4 text-right w-16">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#B08D57]/15">
+                        {filteredAndSortedGuests.map((guest, idx) => (
+                          <tr
+                            key={guest.id}
+                            className="hover:bg-[#EFEEEB]/40 transition-colors group"
+                          >
+                            {/* STT */}
+                            <td className="py-3.5 px-4 text-center font-mono text-[12px] text-[#807569]">
+                              {idx + 1}
+                            </td>
+
+                            {/* Họ và tên */}
+                            <td className="py-3.5 px-4 font-serif text-[15px] font-medium text-[#3A3A38]">
+                              {guest.guest_name}
+                            </td>
+
+                            {/* Số điện thoại */}
+                            <td className="py-3.5 px-4">
+                              <a
+                                href={`tel:${guest.phone}`}
+                                className="inline-flex items-center space-x-1.5 text-[#3A3A38] hover:text-[#8A6B3D] font-mono text-[13px] transition-colors"
+                                title="Gọi số điện thoại này"
+                              >
+                                <Phone size={12} className="text-[#8A6B3D]" />
+                                <span>{guest.phone}</span>
+                              </a>
+                            </td>
+
+                            {/* Trạng thái */}
+                            <td className="py-3.5 px-4">
+                              {guest.status === 'yes' ? (
+                                <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase bg-[#516442]/10 border border-[#516442]/30 text-[#516442] rounded-[2px]">
+                                  Tham dự
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase bg-[#8A6B3D]/10 border border-[#8A6B3D]/30 text-[#8A6B3D] rounded-[2px]">
+                                  Không thể đến
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Số người */}
+                            <td className="py-3.5 px-4 text-center">
+                              {guest.status === 'yes' ? (
+                                <span className="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 bg-[#FAF9F6] border border-[#516442]/30 rounded-[2px] font-semibold text-[#516442] text-[12px]">
+                                  {guest.guest_count ?? 1}
+                                </span>
+                              ) : (
+                                <span className="text-[#807569] text-[12px]">—</span>
+                              )}
+                            </td>
+
+                            {/* Lời chúc */}
+                            <td className="py-3.5 px-4 max-w-xs">
+                              {guest.wishes ? (
+                                <div className="flex items-start space-x-1.5 text-[#3A3A38]">
+                                  <MessageSquare size={12} className="text-[#8A6B3D] shrink-0 mt-1" />
+                                  <span className="italic line-clamp-2 text-[12px]">
+                                    “{guest.wishes}”
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[#807569] italic text-[11px]">Không có</span>
+                              )}
+                            </td>
+
+                            {/* Thời gian */}
+                            <td className="py-3.5 px-4 text-[12px] text-[#6B6A66] whitespace-nowrap">
+                              {formatDateTime(guest.created_at)}
+                            </td>
+
+                            {/* Thao tác xoá (Chỉ admin) */}
+                            <td className="py-3.5 px-4 text-right">
+                              {currentUserRole === 'admin' ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteGuest(guest.id, guest.guest_name)}
+                                  disabled={deletingId === guest.id}
+                                  className="inline-flex items-center justify-center p-1.5 text-[#807569] hover:text-[#BA1A1A] hover:bg-[#BA1A1A]/10 rounded-[2px] transition-colors cursor-pointer disabled:opacity-50"
+                                  title="Xoá bản ghi này khỏi Supabase"
+                                >
+                                  <Trash2 size={14} className={deletingId === guest.id ? 'animate-pulse' : ''} />
+                                </button>
+                              ) : (
+                                <span className="text-[11px] text-[#6B6A66]/50 italic">Chỉ xem</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* MOBILE CARDS VIEW (Hiện trên màn hình nhỏ) */}
+                  <div className="sm:hidden divide-y divide-[#B08D57]/15">
                     {filteredAndSortedGuests.map((guest, idx) => (
-                      <tr
-                        key={guest.id}
-                        className="hover:bg-[#EFEEEB]/40 transition-colors group"
-                      >
-                        {/* STT */}
-                        <td className="py-3.5 px-4 text-center font-mono text-[12px] text-[#807569]">
-                          {idx + 1}
-                        </td>
+                      <div key={guest.id} className="p-4 space-y-2.5">
+                        {/* Hàng 1: STT, Tên, Trạng thái */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-[11px] font-mono text-[#8A6B3D] font-bold">
+                              #{idx + 1}
+                            </span>
+                            <h3 className="font-serif text-[16px] font-medium text-[#3A3A38]">
+                              {guest.guest_name}
+                            </h3>
+                          </div>
 
-                        {/* Họ và tên */}
-                        <td className="py-3.5 px-4 font-serif text-[15px] font-medium text-[#3A3A38]">
-                          {guest.guest_name}
-                        </td>
+                          {guest.status === 'yes' ? (
+                            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase bg-[#516442]/10 border border-[#516442]/30 text-[#516442] rounded-[2px]">
+                              Tham dự ({guest.guest_count ?? 1} người)
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase bg-[#8A6B3D]/10 border border-[#8A6B3D]/30 text-[#8A6B3D] rounded-[2px]">
+                              Không đến
+                            </span>
+                          )}
+                        </div>
 
-                        {/* Số điện thoại */}
-                        <td className="py-3.5 px-4">
+                        {/* Hàng 2: SĐT & Ngày giờ */}
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-[#6B6A66]">
                           <a
                             href={`tel:${guest.phone}`}
-                            className="inline-flex items-center space-x-1.5 text-[#3A3A38] hover:text-[#8A6B3D] font-mono text-[13px] transition-colors"
-                            title="Gọi số điện thoại này"
+                            className="inline-flex items-center space-x-1 text-[#3A3A38] font-mono hover:text-[#8A6B3D]"
                           >
                             <Phone size={12} className="text-[#8A6B3D]" />
                             <span>{guest.phone}</span>
                           </a>
-                        </td>
+                          <span className="inline-flex items-center space-x-1 text-[#807569]">
+                            <Clock size={12} />
+                            <span>{formatDateTime(guest.created_at)}</span>
+                          </span>
+                        </div>
 
-                        {/* Trạng thái */}
-                        <td className="py-3.5 px-4">
-                          {guest.status === 'yes' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase bg-[#516442]/10 border border-[#516442]/30 text-[#516442] rounded-[2px]">
-                              Tham dự
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase bg-[#8A6B3D]/10 border border-[#8A6B3D]/30 text-[#8A6B3D] rounded-[2px]">
-                              Không thể đến
-                            </span>
-                          )}
-                        </td>
+                        {/* Hàng 3: Lời chúc */}
+                        {guest.wishes && (
+                          <div className="p-2.5 bg-[#EFEEEB]/60 border border-[#B08D57]/15 rounded-[2px] text-[13px] text-[#3A3A38] italic font-light">
+                            “{guest.wishes}”
+                          </div>
+                        )}
 
-                        {/* Số người */}
-                        <td className="py-3.5 px-4 text-center">
-                          {guest.status === 'yes' ? (
-                            <span className="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 bg-[#FAF9F6] border border-[#516442]/30 rounded-[2px] font-semibold text-[#516442] text-[12px]">
-                              {guest.guest_count ?? 1}
-                            </span>
-                          ) : (
-                            <span className="text-[#807569] text-[12px]">—</span>
-                          )}
-                        </td>
-
-                        {/* Lời chúc */}
-                        <td className="py-3.5 px-4 max-w-xs">
-                          {guest.wishes ? (
-                            <div className="flex items-start space-x-1.5 text-[#3A3A38]">
-                              <MessageSquare size={12} className="text-[#8A6B3D] shrink-0 mt-1" />
-                              <span className="italic line-clamp-2 text-[12px]">
-                                “{guest.wishes}”
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-[#807569] italic text-[11px]">Không có</span>
-                          )}
-                        </td>
-
-                        {/* Thời gian */}
-                        <td className="py-3.5 px-4 text-[12px] text-[#6B6A66] whitespace-nowrap">
-                          {formatDateTime(guest.created_at)}
-                        </td>
-
-                        {/* Thao tác xoá */}
-                        <td className="py-3.5 px-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteGuest(guest.id, guest.guest_name)}
-                            disabled={deletingId === guest.id}
-                            className="inline-flex items-center justify-center p-1.5 text-[#807569] hover:text-[#BA1A1A] hover:bg-[#BA1A1A]/10 rounded-[2px] transition-colors cursor-pointer disabled:opacity-50"
-                            title="Xoá bản ghi này khỏi Supabase"
-                          >
-                            <Trash2 size={14} className={deletingId === guest.id ? 'animate-pulse' : ''} />
-                          </button>
-                        </td>
-                      </tr>
+                        {/* Hàng 4: Nút xoá (Chỉ admin) */}
+                        {currentUserRole === 'admin' && (
+                          <div className="pt-1 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteGuest(guest.id, guest.guest_name)}
+                              disabled={deletingId === guest.id}
+                              className="inline-flex items-center space-x-1 px-2 py-1 text-[11px] text-[#BA1A1A] hover:bg-[#BA1A1A]/10 rounded-[2px] transition-colors"
+                            >
+                              <Trash2 size={12} />
+                              <span>Xoá</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* MOBILE CARDS VIEW (Hiện trên màn hình nhỏ) */}
-              <div className="sm:hidden divide-y divide-[#B08D57]/15">
-                {filteredAndSortedGuests.map((guest, idx) => (
-                  <div key={guest.id} className="p-4 space-y-2.5">
-                    {/* Hàng 1: STT, Tên, Trạng thái */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-[11px] font-mono text-[#8A6B3D] font-bold">
-                          #{idx + 1}
-                        </span>
-                        <h3 className="font-serif text-[16px] font-medium text-[#3A3A38]">
-                          {guest.guest_name}
-                        </h3>
-                      </div>
-
-                      {guest.status === 'yes' ? (
-                        <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase bg-[#516442]/10 border border-[#516442]/30 text-[#516442] rounded-[2px]">
-                          Tham dự ({guest.guest_count ?? 1} người)
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase bg-[#8A6B3D]/10 border border-[#8A6B3D]/30 text-[#8A6B3D] rounded-[2px]">
-                          Không đến
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Hàng 2: SĐT & Ngày giờ */}
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-[#6B6A66]">
-                      <a
-                        href={`tel:${guest.phone}`}
-                        className="inline-flex items-center space-x-1 text-[#3A3A38] font-mono hover:text-[#8A6B3D]"
-                      >
-                        <Phone size={12} className="text-[#8A6B3D]" />
-                        <span>{guest.phone}</span>
-                      </a>
-                      <span className="inline-flex items-center space-x-1 text-[#807569]">
-                        <Clock size={12} />
-                        <span>{formatDateTime(guest.created_at)}</span>
-                      </span>
-                    </div>
-
-                    {/* Hàng 3: Lời chúc */}
-                    {guest.wishes && (
-                      <div className="p-2.5 bg-[#EFEEEB]/60 border border-[#B08D57]/15 rounded-[2px] text-[13px] text-[#3A3A38] italic font-light">
-                        “{guest.wishes}”
-                      </div>
-                    )}
-
-                    {/* Hàng 4: Nút xoá */}
-                    <div className="pt-1 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteGuest(guest.id, guest.guest_name)}
-                        disabled={deletingId === guest.id}
-                        className="inline-flex items-center space-x-1 px-2 py-1 text-[11px] text-[#BA1A1A] hover:bg-[#BA1A1A]/10 rounded-[2px] transition-colors"
-                      >
-                        <Trash2 size={12} />
-                        <span>Xoá</span>
-                      </button>
-                    </div>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </main>
+
+      {/* Modal Đổi Mật Khẩu Cá Nhân */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        onSuccess={(msg) => showToast(msg)}
+      />
     </div>
   )
 }
