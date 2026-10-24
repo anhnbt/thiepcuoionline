@@ -24,7 +24,8 @@ import {
   Sparkles,
   LogOut,
   KeyRound,
-  ShieldCheck
+  ShieldCheck,
+  BarChart3
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { SupabaseRsvpGuest } from '@/types/rsvp'
@@ -32,11 +33,12 @@ import { AdminRole } from '@/types/admin'
 import { AdminLogin } from '@/components/wedding/AdminLogin'
 import { AdminUserManagement } from '@/components/wedding/admin/AdminUserManagement'
 import { ChangePasswordModal } from '@/components/wedding/admin/ChangePasswordModal'
+import { DailyStatsDashboard } from '@/components/wedding/DailyStatsDashboard'
 
 export function AdminDashboard() {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [currentUserRole, setCurrentUserRole] = useState<AdminRole>('admin')
-  const [activeTab, setActiveTab] = useState<'guests' | 'users'>('guests')
+  const [activeTab, setActiveTab] = useState<'guests' | 'stats' | 'users'>('guests')
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [isAuthChecking, setIsAuthChecking] = useState(true)
   const [guests, setGuests] = useState<SupabaseRsvpGuest[]>([])
@@ -406,6 +408,18 @@ export function AdminDashboard() {
 
             <button
               type="button"
+              onClick={() => setActiveTab('stats')}
+              className={`pb-2 text-[13px] font-medium transition-colors border-b-2 flex items-center space-x-2 cursor-pointer ${activeTab === 'stats'
+                ? 'border-[#8A6B3D] text-[#8A6B3D]'
+                : 'border-transparent text-[#6B6A66] hover:text-[#3A3A38]'
+                }`}
+            >
+              <BarChart3 size={15} />
+              <span>Thống kê ngày</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('users')}
               className={`pb-2 text-[13px] font-medium transition-colors border-b-2 flex items-center space-x-2 cursor-pointer ${activeTab === 'users'
                 ? 'border-[#8A6B3D] text-[#8A6B3D]'
@@ -427,6 +441,8 @@ export function AdminDashboard() {
             currentUserRole={currentUserRole}
             onToast={showToast}
           />
+        ) : activeTab === 'stats' ? (
+          <DailyStatsDashboard />
         ) : (
           <>
             {/* Banner thông báo lỗi nếu có */}

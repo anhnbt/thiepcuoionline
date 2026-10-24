@@ -95,7 +95,7 @@ export function AdminUserManagement({
         setUsers(DEFAULT_FALLBACK_USERS)
         if (error.code === '42P01') {
           setErrorMessage(
-            'Bảng `admin_users` chưa được tạo trên Supabase. Bạn có thể chạy script trong `docs/sql/create_admin_users.sql` để đồng bộ.'
+            'Bảng `admin_users` chưa được tạo trên Supabase. Bạn có thể chạy script trong `docs/sql/00-migration-tron-goi.sql` hoặc `docs/sql/02-bang-admin-users.sql` để đồng bộ.'
           )
         }
       } else if (data && data.length > 0) {
