@@ -8,6 +8,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { weddingData, TimelineItem } from '@/data/wedding-data'
+import { AddToCalendarButton } from './AddToCalendarButton'
 
 function getTimelineIcon(icon: TimelineItem['icon']) {
   switch (icon) {
@@ -92,10 +93,16 @@ export function TimelineSection() {
         </div>
 
         {/* Timeline Bottom Note */}
-        <div className="mt-16 text-center">
-          <span className="inline-block text-[12px] uppercase tracking-[0.2em] text-[#8A6B3D] border-b border-[#B08D57]/40 pb-1 font-medium">
-            25 • 12 • 2026 • Trống Đồng Palace Linh Đàm
-          </span>
+        <div className="mt-16 text-center space-y-5">
+          <div>
+            <span className="inline-block text-[12px] uppercase tracking-[0.2em] text-[#8A6B3D] border-b border-[#B08D57]/40 pb-1 font-medium">
+              26 • 12 • 2026 • Trống Đồng Palace Linh Đàm
+            </span>
+          </div>
+
+          <div>
+            <AddToCalendarButton variant="outline" />
+          </div>
         </div>
       </div>
     </section>

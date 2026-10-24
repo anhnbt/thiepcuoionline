@@ -84,11 +84,11 @@ export const weddingData: WeddingData = {
   event: {
     solarDate: '26 Tháng 12, 2026',
     lunarDate: '17 Tháng 11 năm Bính Ngọ',
-    dayOfWeek: 'Thứ Sáu',
+    dayOfWeek: 'Thứ Bảy',
     year: 2026,
     month: 12,
     day: 26,
-    time: '17:30',
+    time: '17:00 (Khai tiệc 17:30)',
     rsvpDeadline: '15 Tháng 12, 2026',
   },
   quotes: {
@@ -107,7 +107,7 @@ export const weddingData: WeddingData = {
       venueName: 'Trung tâm Tiệc cưới Trống Đồng Palace Linh Đàm',
       hall: 'Sảnh Grand Ballroom — Tầng 2',
       address: 'Khu đô thị Bán đảo Linh Đàm, Phường Hoàng Liệt, Quận Hoàng Mai, Hà Nội',
-      date: 'Thứ Sáu, ngày 25 tháng 12 năm 2026',
+      date: 'Thứ Bảy, ngày 26 tháng 12 năm 2026',
       time: '17:30 (Đón khách từ 17:00)',
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=Tr%E1%BB%91ng+%C4%90%E1%BB%93ng+Palace+Linh+%C4%90%C3%A0m,+H%C3%A0+N%E1%BB%99i',
       embedMapUrl: 'https://maps.google.com/maps?q=Tr%E1%BB%91ng+%C4%90%E1%BB%93ng+Palace+Linh+%C4%90%C3%A0m,+Ho%C3%A0ng+Mai,+H%C3%A0+N%E1%BB%99i&t=&z=15&ie=UTF8&iwloc=&output=embed',

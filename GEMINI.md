@@ -16,7 +16,7 @@ sau đó nhắc tôi cập nhật lại vào tệp này.
 
 ## 1. Dự án này là gì
 
-Landing page thiệp cưới online cho cặp đôi **Nam & Lan**, ngày cưới **25/12/2026**.
+Landing page thiệp cưới online cho cặp đôi **Tuấn Anh & Hoa**, ngày cưới **26/12/2026**.
 Tính năng trung tâm là **RSVP** — khách mời bấm xác nhận có tới dự hay không.
 
 Người dùng là **khách mời được mời cưới**, phần lớn mở link từ điện thoại qua Zalo

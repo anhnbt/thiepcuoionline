@@ -25,8 +25,8 @@ export function CountdownTimer() {
   useEffect(() => {
     setIsMounted(true)
 
-    // Đám cưới lúc 17:30 ngày 25 tháng 12 năm 2026 (Giờ Việt Nam UTC+7)
-    const targetDate = new Date(`${event.year}-${String(event.month).padStart(2, '0')}-${String(event.day).padStart(2, '0')}T17:30:00+07:00`).getTime()
+    // Đám cưới lúc 17:00 ngày 26 tháng 12 năm 2026 (Giờ Việt Nam UTC+7)
+    const targetDate = new Date(`${event.year}-${String(event.month).padStart(2, '0')}-${String(event.day).padStart(2, '0')}T17:00:00+07:00`).getTime()
 
     const calculateTimeLeft = () => {
       const now = new Date().getTime()

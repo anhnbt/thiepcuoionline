@@ -2,7 +2,7 @@
 
 ## 1. Sản phẩm & người dùng
 
-Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa), giải quyết nhu cầu:
+Trang web thiệp cưới online cho cặp đôi **Tuấn Anh & Hoa**, giải quyết nhu cầu:
 * Khách mời xem thông tin ngày cưới, địa điểm, lịch trình chi tiết và album ảnh trực tiếp trên điện thoại (chủ yếu mở qua Zalo, Facebook Messenger).
 * Khách mời xác nhận tham dự (RSVP) nhanh chóng, dễ dàng mà không cần tạo tài khoản hay cài đặt ứng dụng.
 * Khách mời dễ dàng lưu sự kiện ngày cưới vào Google Calendar để không bị quên lịch.
@@ -10,7 +10,7 @@ Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa),
 ## 2. Phạm vi MVP
 
 * **Làm:**
-  * Thông tin sự kiện và lịch trình đám cưới (ngày 25/12/2026, từ 17:00 đến 21:30).
+  * Thông tin sự kiện và lịch trình đám cưới (ngày **26/12/2026**, từ 17:00 đến 21:30).
   * Form xác nhận tham dự (RSVP).
   * Bản đồ chỉ đường tới địa điểm tổ chức.
   * Album ảnh cưới (xem phóng to ảnh).
@@ -27,8 +27,8 @@ Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa),
 
 * Khi khách bấm nút *"Thêm vào Google Calendar"* (tại khu vực Lịch trình sự kiện hoặc màn hình cảm ơn sau RSVP), trình duyệt mở một tab mới (`target="_blank"`, `rel="noopener noreferrer"`) dẫn tới trang tạo sự kiện của Google Calendar.
 * Khi trang Google Calendar mở ra, các trường sự kiện được điền sẵn đầy đủ:
-  * **Tiêu đề:** Đám cưới Tuấn Anh & Hoa (hoặc Nam & Lan).
-  * **Thời gian:** 17:00 - 21:30, ngày 25/12/2026 (múi giờ GMT+7, Asia/Ho_Chi_Minh).
+  * **Tiêu đề:** Đám cưới Tuấn Anh & Hoa.
+  * **Thời gian:** 17:00 - 21:30, ngày 26/12/2026 (múi giờ GMT+7, Asia/Ho_Chi_Minh).
   * **Địa điểm:** Trung tâm Tiệc cưới Trống Đồng Palace Linh Đàm, Khu đô thị Bán đảo Linh Đàm, Hoàng Liệt, Hoàng Mai, Hà Nội.
   * **Mô tả/Chi tiết:** Lời mời đám cưới kèm đường dẫn website thiệp cưới.
 * Khi khách bấm "Lưu" (Save) trên Google Calendar, sự kiện được ghi nhận vào lịch cá nhân của khách.
@@ -57,8 +57,8 @@ Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa),
 | Trường dữ liệu | Nguồn dữ liệu | Giá trị mặc định |
 |---|---|---|
 | Tiêu đề sự kiện | `weddingData` | Đám cưới Tuấn Anh & Hoa |
-| Thời gian bắt đầu | `weddingData.event` | 2026-12-25 17:00 (GMT+7) |
-| Thời gian kết thúc | `weddingData.event` | 2026-12-25 21:30 (GMT+7) |
+| Thời gian bắt đầu | `weddingData.event` | 2026-12-26 17:00 (GMT+7) |
+| Thời gian kết thúc | `weddingData.event` | 2026-12-26 21:30 (GMT+7) |
 | Địa điểm tổ chức | `weddingData.venues[0]` | Trống Đồng Palace Linh Đàm, Hoàng Mai, Hà Nội |
 | Đường dẫn URL | URL website thực tế | Đường dẫn website thiệp cưới |
 
@@ -74,7 +74,7 @@ Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa),
 * **Khách mở từ trình duyệt nhúng (in-app browser) của Zalo / Facebook Messenger:**
   * Sử dụng liên kết web tiêu chuẩn `https://calendar.google.com/calendar/render?action=TEMPLATE...` mở tab mới để đảm bảo tính tương thích; nếu chưa đăng nhập Google, trang Google sẽ yêu cầu đăng nhập trước khi hiển thị form sự kiện.
 * **Lệch múi giờ thiết bị:**
-  * Khóa cứng tham số múi giờ `ctz=Asia/Ho_Chi_Minh` hoặc định dạng giờ UTC chuẩn (`20261225T100000Z/20261225T143000Z`) để tránh trường hợp điện thoại khách đặt lệch múi giờ làm sai thời gian đám cưới.
+  * Khóa cứng tham số múi giờ `ctz=Asia/Ho_Chi_Minh` hoặc định dạng giờ UTC chuẩn (`20261226T100000Z/20261226T143000Z`) để tránh trường hợp điện thoại khách đặt lệch múi giờ làm sai thời gian đám cưới.
 * **Ký tự tiếng Việt có dấu:**
   * Toàn bộ nội dung tiêu đề, địa điểm, mô tả đều được mã hoá URL chuẩn (`encodeURIComponent`) để không bị lỗi font hoặc đứt gãy liên kết trên di động.
 * **Khách dùng iPhone không dùng Google Calendar:**
@@ -83,4 +83,3 @@ Trang web thiệp cưới online cho cặp đôi (Nam & Lan / Tuấn Anh & Hoa),
 ## 6. Câu hỏi còn mở
 
 1. Có cần làm thêm nút tải file `.ics` (iCalendar) cho khách dùng iPhone muốn lưu trực tiếp vào ứng dụng Lịch mặc định của Apple không? (Đã tạm hoãn ở MVP).
-2. Tên cặp đôi trong dữ liệu cưới: Đồng bộ hiển thị "Tuấn Anh & Hoa" hay "Nam & Lan" giữa `GEMINI.md` và `wedding-data.ts` khi phát hành chính thức?

@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { CheckCircle, Heart, Send, RefreshCw, AlertCircle } from 'lucide-react'
 import { weddingData } from '@/data/wedding-data'
 import { createClient } from '@/utils/supabase/client'
+import { AddToCalendarButton } from './AddToCalendarButton'
 
 export function RsvpSection() {
   const { event, groom, bride } = weddingData
@@ -181,6 +182,12 @@ export function RsvpSection() {
                   ? `${groom.shortName} & ${bride.shortName} rất nóng lòng được chào đón bạn vào ngày 26/12/2026!`
                   : `Cảm ơn bạn đã gửi lời chúc yêu thương đến ${groom.shortName} & ${bride.shortName}!`}
               </p>
+
+              {formData.attendance === 'yes' && (
+                <div className="pt-2">
+                  <AddToCalendarButton variant="primary" />
+                </div>
+              )}
 
               <div className="pt-3">
                 <button
